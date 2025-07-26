@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SSE Notification App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 1rem;
+      }
+      #messages {
+        margin-top: 1rem;
+      }
+      .msg {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SSE Notification App</h1>
+    <div id="root"></div>
+
+    <!-- React via CDN -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+    ></script>
+    <script>
+      const { useState, useEffect } = React;
+
+      function App() {
+        const [messages, setMessages] = useState([]);
+
+        useEffect(() => {
+          const source = new EventSource("/api/stream");
+          source.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            setMessages((prev) => [data, ...prev]);
+          };
+          return () => source.close();
+        }, []);
+
+        return React.createElement(
+          "div",
+          null,
+          React.createElement("h2", null, "Incoming messages"),
+          React.createElement(
+            "div",
+            { id: "messages" },
+            messages.map((m, idx) =>
+              React.createElement(
+                "div",
+                { key: idx, className: "msg" },
+                `${m.timestamp}: ${m.message}`
+              )
+            )
+          )
+        );
+      }
+
+      ReactDOM.render(
+        React.createElement(App),
+        document.getElementById("root")
+      );
+    </script>
+  </body>
+</html>

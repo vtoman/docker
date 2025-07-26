@@ -1,0 +1,55 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SSE Notification API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/stream": {
+      "get": {
+        "summary": "Server-Sent Events stream",
+        "description": "Opens a persistent connection that pushes JSON messages.",
+        "responses": {
+          "200": {
+            "description": "SSE stream of notification objects",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "example": "data: {\"message\":\"Hello world 1\",\"timestamp\":\"2023-01-01T12:00:00Z\"}\n\n"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/message": {
+      "post": {
+        "summary": "Push custom message to SSE clients",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": { "type": "string" }
+                },
+                "required": ["message"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Message accepted and will be broadcast"
+          },
+          "400": {
+            "description": "Bad Request when message field missing"
+          }
+        }
+      }
+    }
+  }
+}
